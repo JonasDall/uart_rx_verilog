@@ -6,10 +6,12 @@ module uart (
   input rst,
   output tick
 );
-  counter counter_1 (
-    .clk(clk),
+  counter counter_1 #(
+    .max=400
+  )(
+    .in(clk),
     .rst(rst),
-    .tick(tick)
+    .out(tick)
   );
   
 endmodule
