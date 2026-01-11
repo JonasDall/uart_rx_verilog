@@ -1,28 +1,30 @@
+`default_nettype none
+`timescale 10 ns / 1 ns
 
-// Testbench template
-
-`default_nettype none `timescale 10 ns / 1 ns
-
-
-module blinky_tb;
+module uart_tb;
 
   // Input.
-  reg clk = 0;
-  reg rst = 0;
-  reg tick = 0;
+  logic clk = 0;
+  logic rst;
+  logic tick;
 
-  uart uart_1 (
-    .clk(clk),
+  counter #(.max(3)) counter_1 (
+    .in(clk),
     .rst(rst),
-    .tick(tick)
+    .out(tick)
   );
 
   initial begin
     // Dump vars to the output .vcd file
     $dumpvars(0, uart_tb);
 
+    rst = 1;
+    #1 rst = 0;
+
     repeat (50) begin
+      $display("%0d", tick);
       #10 clk = ~clk;
+      $display("%0d", tick);
     end
 
     $display("End of simulation");

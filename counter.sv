@@ -1,14 +1,26 @@
-module counter #( // Emits a resing edge when the count is reached
-    parameter integer max
+module counter #( // Emits a rising edge when the count is reached
+    parameter int unsigned max
 )(
-    input in,
-    input rst,
-    output reg out
+    input logic in,
+    input logic rst,
+    output logic out
 );
-    logic [$clog2(MAX_COUNT+1)-1:0] count;
+    logic [31:0] count = 0; // Consists of enough bits to represent the full count
 
-    always @(posedge in or posedge rst) begin
-        if (rst)
-            count = 0;
+    always_ff @(posedge in or posedge rst) begin
+        if (rst) begin
+            count <= 0;
+            out <= 0;
+        end
+        else begin
+            if (count >= max) begin
+                count <= 0;
+                out <= 1;
+            end
+            else begin
+                count <= count + 1;
+                out <= 0;
+            end
+        end
     end
 endmodule
