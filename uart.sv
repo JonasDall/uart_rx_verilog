@@ -26,6 +26,14 @@ module uart #(
   logic node_a;
   logic [sample_count-1:0] empty_count;
 
+  // Modules
+  counter #(.max(), .width()) delay_clock (
+    .in(),
+    .rst(),
+    .out(),
+    .count()
+  );
+
   counter #(.max(sample_count), .width($clog2(sample_count))) sample_clock (
     .in(clk),
     .rst(rst),
@@ -40,4 +48,10 @@ module uart #(
     .count(led[6:0])
   );
 
+  always_comb @(posedge clk) begin
+    next_state = current_state;
+    case(current_state)
+      IDLE: next_state = INIT;
+    endcase
+  end
 endmodule
