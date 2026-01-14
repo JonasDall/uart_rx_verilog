@@ -1,14 +1,11 @@
 module counter #( // Emits a rising edge when the count is reached
-    parameter int unsigned max,
-    parameter int unsigned width
+    parameter int unsigned max
 )(
-    input logic in,
-    input logic rst,
-    output logic out = 0,
-    output logic [width:0] count
+    input wire in,
+    input wire rst,
+    output wire out
 );
-    logic [width:0] max_u;
-    assign max_u = logic'(max);
+    output logic [width:0] count
 
     always_ff @(posedge in or posedge rst) begin
         if (rst) begin
