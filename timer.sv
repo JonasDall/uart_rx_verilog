@@ -1,11 +1,12 @@
-module counter #( // Emits a rising edge when the count is reached
-    parameter int unsigned max
+module timer #( // Emits a rising edge when the count is reached
+    parameter int unsigned times
 )(
     input wire in,
     input wire rst,
-    output wire out
+    output reg out
 );
-    output logic [width:0] count
+    logic [$clog2(times):0] count = 0;
+    logic [$clog2(times):0] measure = times[$clog2(times):0];
 
     always_ff @(posedge in or posedge rst) begin
         if (rst) begin
@@ -13,7 +14,7 @@ module counter #( // Emits a rising edge when the count is reached
             out <= 0;
         end
         else begin
-            if (count >= max_u) begin
+            if (count >= measure) begin
                 count <= 0;
                 out <= 1;
             end
