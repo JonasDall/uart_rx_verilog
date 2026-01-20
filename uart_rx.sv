@@ -3,21 +3,62 @@ module uart #(
   parameter BIT_WIDTH = 8
 )(
   input wire clk,
+  input wire rx,
   input wire rst,
   input wire ready,
   input wire success,
   output reg [BIT_WIDTH-1:0] byte
 );
-  timer #(.times(100_000_000)) timer_1 (
+// Wires
+wire start_out, bit_out, rx_sync;
+
+// Parameters
+  parameter IDLE = 2'b00;
+  parameter START = 2'b01;
+  parameter BIT = 2'b11;
+  parameter STOP = 2'b10;
+
+// Regs
+  reg start_rst, bit_rst, rx_ff1, rx_ff2, rx_ff3;
+  reg [1:0] current_state = IDLE, next_state = IDLE;
+
+  timer #(.times(CLOCK_BAUD_RATIO/2)) start_delay (
     .in(clk),
-    .rst(rst),
-    .out(out)
+    .rst(start_rst),
+    .out(start_out)
   );
 
-  always_ff @(negedge rst or posedge out) begin
-    if (!rst)
-      count <= 0;
-    else
-    count <= count + 1;
+  timer #(.times(CLOCK_BAUD_RATIO)) bit_delay (
+    .in(clk),
+    .rst(bit_rst),
+    .out(bit_out)
+  );
+
+  always @(posedge clk) begin
+    rx_ff1 <= rx;
+    rx_ff2 <= rx_ff1;
+    rx_ff3 <= rx_ff2;
+  end
+
+  assign rx_falling = (rx_ff3) && (!rx_ff2);
+
+  always @(posedge clk) begin
+    current_state <= next_state;
+    case (current_state)
+      IDLE:
+      START:
+      BIT:
+      STOP:
+    endcase
+  end
+
+  always @* begin
+    next_state = current_state;
+    case (current_state)
+      IDLE:
+      START:
+      BIT:
+      STOP:
+    endcase
   end
 endmodule

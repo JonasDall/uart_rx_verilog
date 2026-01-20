@@ -5,8 +5,8 @@ module timer #( // Emits a rising edge when the count is reached
     input wire rst,
     output reg out
 );
-    logic [$clog2(times):0] count = 0;
-    logic [$clog2(times):0] measure = times[$clog2(times):0];
+    logic [$clog2(times-1):0] count = 0;
+    logic [$clog2(times-1):0] measure = times[$clog2(times-1):0];
 
     always_ff @(posedge in or posedge rst) begin
         if (rst) begin
