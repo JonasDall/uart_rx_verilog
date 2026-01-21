@@ -21,6 +21,7 @@ wire start_out, bit_out, rx_sync;
 // Regs
   reg start_rst, bit_rst, rx_ff1, rx_ff2, rx_ff3;
   reg [1:0] current_state = IDLE, next_state = IDLE;
+  reg [$log2(BIT_WIDTH)-1:0] n = 0;
 
   timer #(.times(CLOCK_BAUD_RATIO/2)) start_delay (
     .in(clk),
@@ -44,21 +45,35 @@ wire start_out, bit_out, rx_sync;
 
   always @(posedge clk) begin
     current_state <= next_state;
+    start_rst <= 1'b0;
+    bit_rst <= 1'b0;
+    ready <= 1'b0;
+    success <= 1'b0;
     case (current_state)
-      IDLE:
-      START:
-      BIT:
-      STOP:
+      IDLE: start_rst <= 1'b1;
+      START: bit_rst <= 1'b1;
+      BIT: begin
+        if (bit_out) begin
+          byte[n] = rx;
+          n = n + 1;
+        end
+      end
+      STOP: begin
+        if (bit_out) begin
+          ready <= 1'b1;
+          success <= rx;
+        end
+      end
     endcase
   end
 
   always @* begin
     next_state = current_state;
     case (current_state)
-      IDLE:
-      START:
-      BIT:
-      STOP:
+      IDLE: if (rx_falling) next_state = START;
+      START: if (start_out) next_state = BIT;
+      BIT: if (n >= BIT_WIDTH) next_state = STOP;
+      STOP: if (bit_out) next_state = IDLE;
     endcase
   end
 endmodule
